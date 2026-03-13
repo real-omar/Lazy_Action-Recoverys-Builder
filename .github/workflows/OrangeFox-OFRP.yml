@@ -19,7 +19,7 @@ on:
       DEVICE_TREE:
         description: 'Custom Recovery Tree'
         required: true
-        default: 'https://github.com/real-omar/pbrp_device_oppo_CPH1989'
+        default: 'https://github.com/real-omar/recovery_device_oppo_CPH1989'
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch'
         required: true
