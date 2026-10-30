@@ -63,7 +63,7 @@ jobs:
         echo "Device Tree: ${{ inputs.DEVICE_TREE }}"
         echo "Device Branch: ${{ inputs.DEVICE_TREE_BRANCH }}"
         echo "Build Target: ${{ inputs.BUILD_TARGET }}image"
-              
+
     - name: Clean-up
       uses: rokibhasansagar/slimhub_actions@main
 
@@ -71,14 +71,15 @@ jobs:
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 12
-      
+
     - name: Build Environment
       run: |
-        sudo apt install aria2 -y
+        sudo apt-get update
+        sudo apt-get install -y aria2
         git clone https://gitlab.com/OrangeFox/misc/scripts
         cd scripts
         sudo bash setup/android_build_env.sh
-      
+
     - name: Set-up Manifest
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox
@@ -140,7 +141,10 @@ jobs:
     - name: Installing python2 for legacy builds
       if: env.CHECK_LEGACY_BRANCH == 'true'
       run: |
-        sudo apt-get install python2 python-is-python2
+        sudo apt-get update
+        sudo apt-get install -y python2
+        sudo ln -sf /usr/bin/python2 /usr/bin/python
+        python --version
 
     - name: Building OrangeFox
       run: |
@@ -148,7 +152,10 @@ jobs:
         set +e
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
-        chmod +x device/oppo/CPH1989/recovery/root/my_callback.sh
+        # Only chmod the callback script if it exists (legacy branches may not have it)
+        if [ -f device/oppo/CPH1989/recovery/root/my_callback.sh ]; then
+            chmod +x device/oppo/CPH1989/recovery/root/my_callback.sh
+        fi
         set -e
         if [ ${{ inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ inputs.MANIFEST_BRANCH }} == '12.1' ]; then
             lunch twrp_${{ env.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
@@ -193,7 +200,7 @@ jobs:
           Commit: Most recent [commit](${{ inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
           MD5 (img): ${{ env.MD5_IMG }}
           MD5 (zip): ${{ env.MD5_ZIP }}
-          
+
     - name: Run LDCheck
       if: inputs.LDCHECK == 'true'
       run: |
