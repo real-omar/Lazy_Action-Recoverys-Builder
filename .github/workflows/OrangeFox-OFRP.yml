@@ -153,8 +153,8 @@ jobs:
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         # Only chmod the callback script if it exists (legacy branches may not have it)
-        if [ -f device/oppo/CPH1989/recovery/root/my_callback.sh ]; then
-            chmod +x device/oppo/CPH1989/recovery/root/my_callback.sh
+        if [ -f device/samsung/gtaxllte/recovery/root/my_callback.sh ]; then
+            chmod +x device/samsung/gtaxllte/recovery/root/my_callback.sh
         fi
         set -e
         if [ ${{ inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ inputs.MANIFEST_BRANCH }} == '12.1' ]; then
