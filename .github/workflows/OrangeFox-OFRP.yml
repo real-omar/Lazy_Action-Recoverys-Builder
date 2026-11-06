@@ -158,7 +158,12 @@ jobs:
         fi
         set -e
         if [ ${{ inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ inputs.MANIFEST_BRANCH }} == '12.1' ]; then
-            lunch twrp_${{ env.DEVICE_NAME }}-eng && rm -rf out && mka adbd ${{ inputs.BUILD_TARGET }}image
+            lunch twrp_${{ env.DEVICE_NAME }}-eng && rm -rf out
+            mka adbd mkbootimg
+            git clone --depth=1 https://github.com/osm0sis/mkbootimg /tmp/mkbootimg
+            make -C /tmp/mkbootimg
+            cp -f /tmp/mkbootimg/mkbootimg out/host/linux-x86/bin/mkbootimg
+            mka ${{ inputs.BUILD_TARGET }}image
         else
             lunch omni_${{ env.DEVICE_NAME }}-eng && make clean && mka ${{ inputs.BUILD_TARGET }}image
         fi
