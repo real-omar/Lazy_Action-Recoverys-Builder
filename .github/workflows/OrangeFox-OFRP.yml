@@ -146,6 +146,11 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
+    - name: Inspect screenshot code
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        grep -rnE "gr_write_frame_to_file|gr_get_surface|screenshot" bootable/recovery --include=*.cpp --include=*.h | grep -v "^bootable/recovery/gui/.*xml" | head -60    
+
     - name: Swap R/B for fills only
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
