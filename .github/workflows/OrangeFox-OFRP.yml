@@ -146,10 +146,13 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
-    - name: Show screenshot writer
+    - name: Fix screenshot R/B swap
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        sed -n 25,110p bootable/recovery/minuitwrp/graphics_utils.cpp   
+        F=bootable/recovery/minuitwrp/graphics_utils.cpp
+        sed -i 's|png_write_row(png_ptr, ptr);|for (uint32_t sx = 0; sx < surface.width; ++sx) { uint8_t t = ptr[sx*4]; ptr[sx*4] = ptr[sx*4+2]; ptr[sx*4+2] = t; }\n        png_write_row(png_ptr, ptr);|' "$F"
+        grep -n -B1 -A1 "png_write_row" "$F"
+        grep -q "uint8_t t = ptr" "$F" || { echo "PATCH DID NOT APPLY"; exit 1; }   
 
     - name: Swap R/B for fills only
       run: |
