@@ -146,6 +146,14 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
+    - name: Swap R/B for PNG and JPG loading
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        F=bootable/recovery/minuitwrp/resources.cpp
+        sed -i 's/^#if defined(RECOVERY_ARGB) || defined(RECOVERY_BGRA) || defined(RECOVERY_ABGR)$/#if 1/' "$F"
+        grep -n -B1 -A2 "^#if 1" "$F"
+        grep -q "^#if 1" "$F" || { echo "PATCH DID NOT APPLY"; exit 1; }
+
     - name: Fix screenshot R/B swap
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
