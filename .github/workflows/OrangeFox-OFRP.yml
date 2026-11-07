@@ -146,6 +146,13 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
+    - name: Inspect key wake logic
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        grep -nE "KEY_POWER|KEY_HOME|KEY_HOMEPAGE|blankTimer|resetTimerAndUnblank|isScreenOff|TW_POWER" bootable/recovery/gui/*.cpp bootable/recovery/gui/*.hpp bootable/recovery/gui/*.h 2>/dev/null | head -80
+        sed -n 340,380p bootable/recovery/gui/gui.cpp
+        sed -n 495,530p bootable/recovery/gui/gui.cpp
+
     - name: Swap R/B for PNG and JPG loading
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
