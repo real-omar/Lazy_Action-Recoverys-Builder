@@ -146,12 +146,25 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
-    - name: Inspect key wake logic
+    - name: Let Home key wake the screen
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        grep -nE "KEY_POWER|KEY_HOME|KEY_HOMEPAGE|blankTimer|resetTimerAndUnblank|isScreenOff|TW_POWER" bootable/recovery/gui/*.cpp bootable/recovery/gui/*.hpp bootable/recovery/gui/*.h 2>/dev/null | head -80
-        sed -n 340,380p bootable/recovery/gui/gui.cpp
-        sed -n 495,530p bootable/recovery/gui/gui.cpp
+        python3 - <<'EOF'
+        import re
+        p = "bootable/recovery/gui/gui.cpp"
+        s = open(p).read()
+        pat = re.compile(r'(if\s*\()(ev\.code == KEY_POWER)( && key_status != KS_KEY_REPEAT\)\s*\{\s*LOGEVENT\("POWER Key Released\\n"\);\s*long long now = nowMs\(\);)')
+        new, n = pat.subn(r'\1(\2 || (ev.code == KEY_HOMEPAGE && blankTimer.isScreenOff()))\3', s, count=1)
+        if n != 1:
+            raise SystemExit("PATCH DID NOT APPLY")
+        open(p, "w").write(new)
+        print("patched")
+        EOF
+        grep -n -B2 -A3 "KEY_HOMEPAGE && blankTimer" bootable/recovery/gui/gui.cpp
+        echo "=== context for debugging ==="
+        sed -n 185,215p bootable/recovery/gui/gui.cpp
+        sed -n 312,326p bootable/recovery/gui/gui.cpp
+        sed -n 486,500p bootable/recovery/gui/gui.cpp
 
     - name: Swap R/B for PNG and JPG loading
       run: |
