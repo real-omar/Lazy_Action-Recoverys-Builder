@@ -146,6 +146,24 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
+    - name: Make init ignore failed bootloader message write
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        F=system/core/init/reboot.cc
+        grep -n -B12 -A6 "Failed to set bootloader message" "$F" || true
+        python3 - <<'EOF'
+        import re
+        p = "system/core/init/reboot.cc"
+        s = open(p).read()
+        pat = re.compile(r'return\s+Error\(\)\s*<<\s*"Failed to set bootloader message: "\s*<<\s*err\s*;')
+        new, n = pat.subn('LOG(ERROR) << "Failed to set bootloader message (ignored): " << err;', s)
+        if n < 1:
+            raise SystemExit("PATCH DID NOT APPLY")
+        open(p, "w").write(new)
+        print("patched", n)
+        EOF
+        grep -n "ignored" "$F"
+
     - name: Reboot to recovery via direct syscall
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
