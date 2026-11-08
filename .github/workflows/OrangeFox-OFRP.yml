@@ -164,25 +164,6 @@ jobs:
         EOF
         grep -n -A16 'reboot_target == "recovery"' "$F" | head -30
 
-    - name: Reboot to recovery via direct syscall
-      run: |
-        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        grep -nE "rb_recovery|ANDROID_RB_PROPERTY|reboot,recovery" bootable/recovery/twrp-functions.cpp
-        python3 - <<'EOF'
-        import re
-        p = "bootable/recovery/twrp-functions.cpp"
-        s = open(p).read()
-        pat = re.compile(r'property_set\(\s*ANDROID_RB_PROPERTY\s*,\s*"reboot,recovery"\s*\)')
-        repl = '(sync(), (int)syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, "recovery"))'
-        new, n = pat.subn(repl, s)
-        if n < 1:
-            raise SystemExit("PATCH DID NOT APPLY")
-        if "<sys/syscall.h>" not in new:
-            new = '#include <sys/syscall.h>\n#include <linux/reboot.h>\n#include <unistd.h>\n' + new
-        open(p, "w").write(new)
-        print("patched", n)
-        EOF
-
     - name: Let Home key wake the screen
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
