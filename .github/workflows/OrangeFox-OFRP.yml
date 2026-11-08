@@ -146,24 +146,6 @@ jobs:
         sudo ln -sf /usr/bin/python2 /usr/bin/python
         python --version
 
-    - name: Make init continue reboot-to-recovery without misc
-      run: |
-        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        F=$(find system/core/init -name reboot.cpp | head -1)
-        echo "Patching: $F"
-        python3 - "$F" <<'EOF'
-        import re, sys
-        p = sys.argv[1]
-        s = open(p).read()
-        pat = re.compile(r'(reboot_target == "recovery"\) \{.*?Failed to set bootloader message: " << err;\n)\s*return;\n', re.S)
-        new, n = pat.subn(r'\1', s, count=1)
-        if n != 1:
-            raise SystemExit("PATCH DID NOT APPLY")
-        open(p, "w").write(new)
-        print("patched")
-        EOF
-        grep -n -A16 'reboot_target == "recovery"' "$F" | head -30
-
     - name: Let Home key wake the screen
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
