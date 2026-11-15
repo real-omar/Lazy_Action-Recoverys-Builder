@@ -214,9 +214,10 @@ jobs:
         set +e
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
-        # Only chmod the callback script if it exists (legacy branches may not have it)
-        if [ -f device/samsung/gtaxllte/recovery/root/my_callback.sh ]; then
-            chmod +x device/samsung/gtaxllte/recovery/root/my_callback.sh
+        # Only chmod the callback script if it exists
+        CALLBACK_SCRIPT="${DEVICE_DIRECTORY}/${DEVICE_NAME}/recovery/root/my_callback.sh"
+        if [ -f "${CALLBACK_SCRIPT}" ]; then
+            chmod +x "${CALLBACK_SCRIPT}"
         fi
         set -e
         if [ ${{ inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ inputs.MANIFEST_BRANCH }} == '12.1' ]; then
